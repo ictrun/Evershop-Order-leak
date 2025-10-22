@@ -2,7 +2,7 @@
 
 # Security Advisory: Unauthorized Order Information Access (IDOR)
 
-- **CVE ID:** CVE-2025-XXXX-10
+- **CVE ID:** CVE-2025-XXXXx
 - **Product:** EverShop E-Commerce Platform
 - **Vulnerability Type:** Insecure Direct Object Reference (IDOR)
 - **Severity:** HIGH
