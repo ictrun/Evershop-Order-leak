@@ -8,8 +8,8 @@
 - **Severity:** HIGH
 - **CVSS v3.1 Score:** 7.5
 - **CWE:** CWE-639 (Authorization Bypass Through User-Controlled Key)
-- **Disclosure Date:** 2025-01-21
-
+- **Disclosure Date:** 2025-10-23 UTC
+  
 ---
 
 ## Executive Summary
