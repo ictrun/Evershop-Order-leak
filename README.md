@@ -105,3 +105,70 @@ curl -X POST 'https://[REDACTED]/api/graphql' \
 **Step 3: Receive Sensitive Data**
 
 <img width="941" height="518" alt="image" src="https://github.com/user-attachments/assets/0696e74f-c43d-4cfb-aa30-1e44a42269cc" />
+
+
+## Remediation
+
+### Immediate Actions (Priority: CRITICAL)
+
+**1. Apply Emergency Patch**
+
+Implement authentication and authorization checks in the order query resolver:
+
+```javascript
+Query: {
+  order: async (_, { uuid }, { pool, customer }) => {
+    // ✅ Step 1: Verify user is authenticated
+    if (!customer) {
+      throw new Error('Unauthorized: Please login to view order');
+    }
+
+    const query = getOrdersBaseQuery();
+    query.where('uuid', '=', uuid);
+
+    // ✅ Step 2: Verify order ownership
+    query.and('customer_id', '=', customer.customer_id);
+
+    const order = await query.load(pool);
+
+    if (!order) {
+      throw new Error('Order not found or access denied');
+    }
+
+    return camelCase(order);
+  }
+}
+```
+
+**2. Alternative: Token-Based Access**
+
+For guest checkout scenarios, implement a secure token mechanism:
+
+```javascript
+// Generate secure access token during order creation
+const crypto = require('crypto');
+const orderAccessToken = crypto.randomBytes(32).toString('hex');
+
+await insert('order')
+  .given({
+    uuid: orderUuid,
+    access_token: orderAccessToken,
+    // ... other fields
+  })
+  .execute(connection);
+
+// Validate token in query
+Query: {
+  order: async (_, { uuid, token }, { pool }) => {
+    const query = getOrdersBaseQuery();
+    query.where('uuid', '=', uuid);
+    query.and('access_token', '=', token);  // ✅ Require valid token
+
+    const order = await query.load(pool);
+    return order ? camelCase(order) : null;
+  }
+}
+
+// Include token in email links
+const orderViewUrl = `https://[DOMAIN]/order/view/${orderUuid}?token=${orderAccessToken}`;
+```
